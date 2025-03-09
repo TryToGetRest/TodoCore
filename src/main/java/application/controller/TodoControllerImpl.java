@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
+import java.time.DateTimeException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,10 +42,10 @@ public class TodoControllerImpl implements TodoController {
                 }
                 Action action = inputProcessing(input);
                 action.execute();
-            } catch (IOException e) {
-                System.out.println("Некорректный ввод, попробуйте снова" + e.getMessage());
+            } catch (IOException | DateTimeException e) {
+                System.out.println("Некорректный ввод, попробуйте снова");
             } catch (Exception e) {
-                System.out.println("Непредусмотренная ошибка" + e.getMessage());
+                System.out.println("Непредусмотренная ошибка\n" + e.getMessage());
             }
 
         }
