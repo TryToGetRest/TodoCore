@@ -5,24 +5,27 @@ import application.enums.Status;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface TodoService {
 
-    void updateStatus(String title, Status status);
+    void updateStatus(Integer id, Status status);
 
-    void updateDescription(String title, String description);
+    void updateDescription(Integer id, String description);
 
-    void updateDeadline(String title, LocalDateTime deadLine);
+    void updateTitle(Integer id, String newTitle);
+
+    void updateDeadline(Integer id, LocalDateTime deadLine);
 
     void saveTodo(Todo todo);
 
-    void removeTodo(Todo todo);
+    void removeTodo(Integer id);
 
-    List<Todo> findAllTodos();
+    Map<Integer, Todo> findAllTodos();
 
-    Todo findTodoByTitle(String title);
+    Todo findTodoById(Integer id);
 
-    List<Todo> findByStatus(Status status);
+    Map<Integer, Todo> findByStatus(Status status);
 
     List<Todo> sortByDeadline();
 

@@ -11,7 +11,7 @@ public class FindTodosAction implements Action {
     @Override
     public void execute() {
         System.out.println("Вывод всех задач:");
-        todoService.findAllTodos().forEach(System.out::println);
+        todoService.findAllTodos().entrySet().forEach(System.out::println);
     }
 
 }

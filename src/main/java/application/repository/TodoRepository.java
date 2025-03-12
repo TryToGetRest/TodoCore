@@ -4,22 +4,24 @@ import application.entity.Todo;
 import application.enums.Status;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface TodoRepository {
 
     void saveTodo(Todo todo);
 
-    void removeTodo(Todo todo);
+    void removeTodo(Integer id);
 
-    List<Todo> findAllTodos();
+    Map<Integer, Todo> findAllTodos();
 
-    Optional<Todo> findTodoByTitle(String title);
+    Optional<Todo> findTodoById(Integer id);
 
-    void updateStatus(String title, Status status);
+    void updateStatus(Integer id, Status status);
 
-    void updateDescription(String title, String description);
+    void updateDescription(Integer id, String description);
 
-    void updateDeadline(String title, LocalDateTime deadLine);
+    void updateDeadline(Integer id, LocalDateTime deadLine);
+
+    void updateTitle(Integer id, String newTitle);
 }

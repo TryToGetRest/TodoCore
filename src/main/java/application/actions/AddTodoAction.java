@@ -25,13 +25,7 @@ public class AddTodoAction implements Action {
         Status status = Status.valueOf(scanner.nextLine());
         System.out.println("Введите дедлайн задачи, например: 2025-04-01T00:00:00");
         LocalDateTime deadline = LocalDateTime.parse(scanner.nextLine());
-        todoService.saveTodo(Todo
-                .builder()
-                .title(title)
-                .description(description)
-                .deadline(deadline)
-                .status(status)
-                .build());
+        todoService.saveTodo(new Todo(title, description, status, deadline));
         System.out.println("Задача успешно сохранена");
     }
 }

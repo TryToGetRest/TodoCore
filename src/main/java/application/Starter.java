@@ -1,12 +1,11 @@
 package application;
 
-import application.controller.TodoController;
-import application.controller.TodoControllerImpl;
+import application.controller.ConsoleTodoController;
 
 public class Starter {
 
     public static void main(String[] args) {
-        TodoController application = TodoControllerImpl.init();
-        application.execute();
+        ConsoleTodoController application = ConsoleTodoController.init();
+        application.launch();
     }
 }

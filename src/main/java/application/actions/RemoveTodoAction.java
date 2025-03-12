@@ -13,8 +13,8 @@ public class RemoveTodoAction implements Action {
 
     @Override
     public void execute() {
-        System.out.println("Удаляем задачу, для этого введите её название: ");
-        String title = scanner.nextLine();
-        todoService.removeTodo(todoService.findTodoByTitle(title));
+        System.out.println("Удаляем задачу, для этого введите её номер: ");
+        int id = scanner.nextInt();
+        todoService.removeTodo(id);
     }
 }
