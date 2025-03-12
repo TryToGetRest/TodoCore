@@ -75,7 +75,7 @@ public class ConsoleTodoController {
         System.out.println("Введите описание задачи: ");
         String description = scanner.nextLine();
         System.out.println("Введите статус задачи, например TODO, IN_PROGRESS, DONE: ");
-        Status status = Status.valueOf(scanner.nextLine());
+        Status status = Status.valueOf(scanner.nextLine().toUpperCase());
         System.out.println("Введите дедлайн задачи, например: 2025-04-01T00:00:00");
         LocalDateTime deadline = LocalDateTime.parse(scanner.nextLine());
         todoService.saveTodo(new Todo(title, description, status, deadline));
@@ -99,7 +99,7 @@ public class ConsoleTodoController {
     }
 
     public void sortTodos() {
-        System.out.println("Сортируем задачи, по статусу или по дедлайну?\n Корректный ввод: status, deadline\n");
+        System.out.println("Сортируем задачи, по статусу или по дедлайну?\n" + "Корректный ввод: status, deadline\n");
         String sortBy = scanner.nextLine();
         if (sortBy.equals("status")) {
             System.out.println(todoService.sortByStatus());
