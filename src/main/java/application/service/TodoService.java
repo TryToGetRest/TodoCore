@@ -35,8 +35,8 @@ public class TodoService {
         inMemoryTodoRepository.updateDeadline(id, deadLine);
     }
 
-    public void saveTodo(Todo todo) {
-        inMemoryTodoRepository.saveTodo(todo);
+    public void saveTodo(String title, String description, Status status, LocalDateTime deadline) {
+        inMemoryTodoRepository.saveTodo(title, description, status, deadline);
     }
 
     public void removeTodo(Integer id) {

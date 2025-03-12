@@ -15,8 +15,8 @@ public class InMemoryTodoRepository {
     private final Map<Integer, Todo> storage;
     private static Integer idCounter = 0;
 
-    public void saveTodo(Todo todo) {
-        storage.put(++idCounter, todo);
+    public void saveTodo(String title, String description, Status status, LocalDateTime deadline) {
+        storage.put(++idCounter, new Todo(title, description, status, deadline));
     }
 
     public void removeTodo(Integer id) {

@@ -1,6 +1,5 @@
 package application.controller;
 
-import application.entity.Todo;
 import application.enums.ConsoleAction;
 import application.enums.Status;
 import application.enums.TodoFields;
@@ -85,7 +84,7 @@ public class ConsoleTodoController {
         Status status = Status.valueOf(scanner.nextLine().toUpperCase());
         System.out.println("Введите дедлайн задачи, например: 2025-04-01T00:00:00");
         LocalDateTime deadline = LocalDateTime.parse(scanner.nextLine());
-        inMemoryTodoService.saveTodo(new Todo(title, description, status, deadline));
+        inMemoryTodoService.saveTodo(title, description, status, deadline);
         System.out.println("Задача успешно сохранена");
     }
 
