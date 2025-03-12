@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Data
-public class InMemoryTodoService {
+public class TodoService {
 
     private final InMemoryTodoRepository inMemoryTodoRepository;
 

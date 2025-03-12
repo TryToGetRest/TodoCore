@@ -1,6 +1,6 @@
 package application.enums;
 
-public enum MyAction {
+public enum ConsoleAction {
     EXIT,
     HELP,
     ADD,
