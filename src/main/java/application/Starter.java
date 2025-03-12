@@ -2,8 +2,8 @@ package application;
 
 import application.controller.ConsoleTodoController;
 import application.entity.Todo;
-import application.repository.KeyValueTodoRepository;
-import application.service.KeyValueTodoService;
+import application.repository.InMemoryTodoRepository;
+import application.service.InMemoryTodoService;
 
 import java.util.HashMap;
 import java.util.Scanner;
@@ -19,7 +19,7 @@ public class Starter {
     public static ConsoleTodoController init() {
         return new ConsoleTodoController(
                 new Scanner(System.in),
-                new KeyValueTodoService(new KeyValueTodoRepository(new HashMap<Integer, Todo>()))
+                new InMemoryTodoService(new InMemoryTodoRepository(new HashMap<Integer, Todo>()))
         );
     }
 }

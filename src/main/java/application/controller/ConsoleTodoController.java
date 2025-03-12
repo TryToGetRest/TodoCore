@@ -1,11 +1,13 @@
 package application.controller;
 
 import application.entity.Todo;
+import application.enums.MyAction;
 import application.enums.Status;
+import application.enums.TodoFields;
 import application.exceptions.ActionNotFoundException;
 import application.exceptions.TodoAlreadyExistException;
 import application.exceptions.TodoNotFoundException;
-import application.service.TodoService;
+import application.service.InMemoryTodoService;
 import lombok.Data;
 
 import java.time.DateTimeException;
@@ -16,37 +18,38 @@ import java.util.Scanner;
 public class ConsoleTodoController {
 
     private final Scanner scanner;
-    private final TodoService todoService;
-    private Boolean isStopped = false;
+    private final InMemoryTodoService inMemoryTodoService;
 
     public void launch() {
         sayHello();
-        while (!isStopped) {
+        while (true) {
             System.out.println("Ожидается ввод следующей команды: ");
             try {
                 String input = scanner.nextLine();
-                switch (input) {
-                    case "exit" -> isStopped = true;
-                    case "help" -> printHelp();
-                    case "add" -> addTodo();
-                    case "list" -> getAllTodos();
-                    case "filter" -> filterTodos();
-                    case "delete" -> deleteTodo();
-                    case "sort" -> sortTodos();
-                    case "edit" -> editTodo();
+                switch (MyAction.valueOf(input)) {
+                    case EXIT -> {
+                        sayGoodbye();
+                        return;
+                    }
+                    case HELP -> printHelp();
+                    case ADD -> addTodo();
+                    case LIST -> getAllTodos();
+                    case FILTER -> filterTodos();
+                    case DELETE -> deleteTodo();
+                    case SORT -> sortTodos();
+                    case EDIT -> editTodo();
                     default ->
                             throw new ActionNotFoundException(String.format("Действие для ввода %s не найдено", input));
                 }
 
             } catch (ActionNotFoundException | TodoAlreadyExistException | TodoNotFoundException |
                      DateTimeException e) {
-                System.out.println("Некорректный ввод, попробуйте снова");
+                System.out.println(e.getMessage());
             } catch (Exception e) {
                 System.out.println("Необработанная ошибка\n" + e.getMessage());
             }
 
         }
-        sayGoodbye();
     }
 
     public void sayHello() {
@@ -78,38 +81,32 @@ public class ConsoleTodoController {
         Status status = Status.valueOf(scanner.nextLine().toUpperCase());
         System.out.println("Введите дедлайн задачи, например: 2025-04-01T00:00:00");
         LocalDateTime deadline = LocalDateTime.parse(scanner.nextLine());
-        todoService.saveTodo(new Todo(title, description, status, deadline));
+        inMemoryTodoService.saveTodo(new Todo(title, description, status, deadline));
         System.out.println("Задача успешно сохранена");
     }
 
     public void getAllTodos() {
         System.out.println("Вывод всех задач:");
-        todoService.findAllTodos().entrySet().forEach(System.out::println);
+        inMemoryTodoService.findAllTodos().entrySet().forEach(System.out::println);
     }
 
     public void filterTodos() {
         System.out.println("Выводим все задачи по статусу, для этого введите статус который интересует: TODO, IN_PROGRESS, DONE");
-        System.out.println(todoService.findByStatus(Status.valueOf(scanner.nextLine())));
+        System.out.println(inMemoryTodoService.findByStatus(Status.valueOf(scanner.nextLine())));
     }
 
     public void deleteTodo() {
         System.out.println("Удаляем задачу, для этого введите её номер: ");
         int id = scanner.nextInt();
-        todoService.removeTodo(id);
+        inMemoryTodoService.removeTodo(id);
     }
 
     public void sortTodos() {
         System.out.println("Сортируем задачи, по статусу или по дедлайну?\n" + "Корректный ввод: status, deadline\n");
-        String sortBy = scanner.nextLine();
-        if (sortBy.equals("status")) {
-            System.out.println(todoService.sortByStatus());
-            System.out.println("Задачи по статусу успешно отсортированы!\n");
-        } else if (sortBy.equals("deadline")) {
-            System.out.println(todoService.sortByDeadline());
-            System.out.println("Задачи по статусу успешно отсортированы!\n");
-        } else {
-            throw new ActionNotFoundException(String.format("Действие для ввода %s не найдено", sortBy));
-        }
+        String input = scanner.nextLine();
+        TodoFields field = TodoFields.valueOf(input);
+        System.out.println(inMemoryTodoService.sortBy(field));
+        System.out.println("Задачи успешно отсортированы!\n");
     }
 
     public void editTodo() {
@@ -121,25 +118,25 @@ public class ConsoleTodoController {
             case "title" -> {
                 System.out.println("Теперь введите новое имя задачи: ");
                 String newTitle = scanner.nextLine();
-                todoService.updateTitle(id, newTitle);
+                inMemoryTodoService.updateTitle(id, newTitle);
                 System.out.println("Название задачи успешно обновлено!\n");
             }
             case "description" -> {
                 System.out.println("Теперь введите новое описание задачи: ");
                 String newDescription = scanner.nextLine();
-                todoService.updateDescription(id, newDescription);
+                inMemoryTodoService.updateDescription(id, newDescription);
                 System.out.println("Описание задачи успешно обновлено!\n");
             }
             case "status" -> {
                 System.out.println("Теперь введите новый статус:\nКорректный ввод: TODO, IN_PROGRESS, DONE\n");
                 Status newStatus = Status.valueOf(scanner.nextLine());
-                todoService.updateStatus(id, newStatus);
+                inMemoryTodoService.updateStatus(id, newStatus);
                 System.out.println("Статус задачи успешно обновлен!\n");
             }
             case "deadline" -> {
                 System.out.println("Теперь введите новый дедлайн для задачи:\nКорректный ввод: 2025-04-30T00:00:00\n");
                 LocalDateTime deadline = LocalDateTime.parse(scanner.nextLine());
-                todoService.updateDeadline(id, deadline);
+                inMemoryTodoService.updateDeadline(id, deadline);
                 System.out.println("Дедлайн задачи успешно обновлен!\n");
             }
             default -> throw new ActionNotFoundException(String.format("Действие для ввода %s не найдено", input));

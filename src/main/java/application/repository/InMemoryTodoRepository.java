@@ -10,58 +10,57 @@ import java.util.Map;
 import java.util.Optional;
 
 @Data
-public class KeyValueTodoRepository implements TodoRepository {
+public class InMemoryTodoRepository {
 
-    private final Map<Integer, Todo> inMemoryStorage;
-    private static Integer counter = 0;
+    private final Map<Integer, Todo> storage;
+    private static Integer idCounter = 0;
 
     public void saveTodo(Todo todo) {
-        inMemoryStorage.put(++counter, todo);
+        storage.put(++idCounter, todo);
     }
 
     public void removeTodo(Integer id) {
-        if (findTodoById(id).isPresent()) {
-            inMemoryStorage.remove(id);
-        } else {
-            throw new TodoNotFoundException(String.format("Задача с номером %n не существует", id));
+        Todo removed = storage.remove(id);
+        if (removed == null) {
+            throw new TodoNotFoundException(formTodoNotFoundExceptionMessage(id));
         }
     }
 
     public Map<Integer, Todo> findAllTodos() {
-        return inMemoryStorage;
+        return storage;
     }
 
     public Optional<Todo> findTodoById(Integer id) {
-        return Optional.ofNullable(inMemoryStorage.get(id));
+        return Optional.ofNullable(storage.get(id));
     }
 
     public void updateStatus(Integer id, Status status) {
         Optional<Todo> todoById = findTodoById(id);
-        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(String.format("Задача с номером %n не существует", id)));
+        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(formTodoNotFoundExceptionMessage(id)));
         todoPersisted.setStatus(status);
     }
 
     public void updateDescription(Integer id, String description) {
         Optional<Todo> todoById = findTodoById(id);
-        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(String.format("Задача с номером %n не существует", id)));
+        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(formTodoNotFoundExceptionMessage(id)));
         todoPersisted.setDescription(description);
     }
 
     public void updateDeadline(Integer id, LocalDateTime deadLine) {
         Optional<Todo> todoById = findTodoById(id);
-        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(String.format("Задача с номером %n не существует", id)));
+        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(formTodoNotFoundExceptionMessage(id)));
         todoPersisted.setDeadline(deadLine);
     }
 
     public void updateTitle(Integer id, String newTitle) {
         Optional<Todo> todoById = findTodoById(id);
-        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(String.format("Задача с номером %n не существует", id)));
+        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(formTodoNotFoundExceptionMessage(id)));
         todoPersisted.setTitle(newTitle);
     }
 
     public void updateTodo(Integer id, Todo todo) {
         Optional<Todo> todoById = findTodoById(id);
-        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(String.format("Задача с номером %n не существует", id)));
+        Todo todoPersisted = todoById.orElseThrow(() -> new TodoNotFoundException(formTodoNotFoundExceptionMessage(id)));
         bulkUpdate(todoPersisted, todo);
     }
 
@@ -70,5 +69,9 @@ public class KeyValueTodoRepository implements TodoRepository {
         persisted.setTitle(forUpdate.getTitle());
         persisted.setDescription(forUpdate.getDescription());
         persisted.setStatus(forUpdate.getStatus());
+    }
+
+    private String formTodoNotFoundExceptionMessage(Integer id) {
+        return String.format("Задача с номером %n не существует", id);
     }
 }
