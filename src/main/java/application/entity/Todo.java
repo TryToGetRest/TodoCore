@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Data
 public class Todo {
+    private Integer id;
     private String title;
     private String description;
     private Status status;
