@@ -13,7 +13,7 @@ import java.util.Optional;
 public class KeyValueTodoRepository implements TodoRepository {
 
     private final Map<Integer, Todo> inMemoryStorage;
-    private static Integer counter;
+    private static Integer counter = 0;
 
     public void saveTodo(Todo todo) {
         inMemoryStorage.put(++counter, todo);
