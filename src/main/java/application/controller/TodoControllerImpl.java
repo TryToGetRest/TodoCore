@@ -5,16 +5,11 @@ import application.repository.TodoRepositoryImpl;
 import application.service.TodoService;
 import application.service.TodoServiceImpl;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
 import java.time.DateTimeException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 
-@RequiredArgsConstructor
 @Data
 public class TodoControllerImpl implements TodoController {
 
@@ -56,11 +51,8 @@ public class TodoControllerImpl implements TodoController {
 
     @Override
     public Action inputProcessing(String input) throws IOException {
-        return actionMap.entrySet().stream()
-                .filter(o -> o.getKey().equals(input))
-                .findFirst()
-                .orElseThrow(() -> new IOException(String.format("Для ввода: %s не предусмотрено логики", input)))
-                .getValue();
+        return Optional.ofNullable(actionMap.get(input))
+                .orElseThrow(() -> new IOException(String.format("Для ввода: %s не предусмотрено логики", input)));
     }
 
     public Map<String, Action> initActionMap() {
