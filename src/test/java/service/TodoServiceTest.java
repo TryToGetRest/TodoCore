@@ -5,16 +5,16 @@ import application.enums.Status;
 import application.enums.TodoFields;
 import application.exceptions.ActionNotFoundException;
 import application.exceptions.TodoNotFoundException;
+import application.repository.InMemoryTodoRepository;
 import application.service.TodoService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import utils.TodoRepositoryUtils;
-import utils.TodoServiceUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,7 +24,15 @@ public class TodoServiceTest {
 
     @BeforeEach
     public void setUp() {
-        service = new TodoService(TodoRepositoryUtils.createTodoRepository());
+        InMemoryTodoRepository repository = new InMemoryTodoRepository(new ConcurrentHashMap<>());
+        repository.saveTodo("test1", "some description", Status.TODO, LocalDateTime.now().plusMonths(2));
+        repository.saveTodo("test2", "", Status.IN_PROGRESS, LocalDateTime.now().plusDays(2));
+        repository.saveTodo("test3", "some description larger", Status.DONE, LocalDateTime.now().minusMonths(1));
+        repository.saveTodo("test4", "hello world", Status.IN_PROGRESS, LocalDateTime.now().plusHours(3));
+        repository.saveTodo("go to work", "faster!!!", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(2));
+        repository.saveTodo("take offer", "dude just do it", Status.TODO, LocalDateTime.now().plusMonths(2));
+        repository.saveTodo("go to shop", "milk, butter, etc", Status.DONE, LocalDateTime.now().minusHours(45));
+        service = new TodoService(repository);
     }
 
     @Test
@@ -40,7 +48,7 @@ public class TodoServiceTest {
         service.saveTodo(title, description, status, deadline);
 
         // then
-        Todo persisted = service.findTodoById(TodoServiceUtils.findIdByTitle(title, service));
+        Todo persisted = service.findTodoById(findIdByTitle(title, service));
         assertNotNull(persisted, "Задача должна быть сохранена");
         assertEquals(status, persisted.getStatus());
         assertEquals(deadline, persisted.getDeadline());
@@ -124,7 +132,7 @@ public class TodoServiceTest {
         // given
         String title = "Task";
         service.saveTodo(title, "Desc", Status.TODO, LocalDateTime.now().plusDays(1));
-        Integer id = TodoServiceUtils.findIdByTitle(title, service);
+        Integer id = findIdByTitle(title, service);
 
         // when
         service.removeTodo(id);
@@ -137,7 +145,7 @@ public class TodoServiceTest {
     @DisplayName("Test filter todos functionality")
     public void givenMultipleTodos_whenFindByStatus_thenCorrect() {
         // given
-        TodoServiceUtils.dropTodos(service);
+        dropTodos(service);
         service.saveTodo("Task1", "Desc1", Status.TODO, LocalDateTime.now().plusDays(1));
         service.saveTodo("Task2", "Desc2", Status.DONE, LocalDateTime.now().plusDays(2));
         service.saveTodo("Task3", "Desc3", Status.IN_PROGRESS, LocalDateTime.now().plusDays(3));
@@ -153,7 +161,7 @@ public class TodoServiceTest {
     @DisplayName("Test ordering by deadline functionality")
     public void givenMultipleTodos_whenSortByDeadline_thenSorted() {
         // given
-        TodoServiceUtils.dropTodos(service);
+        dropTodos(service);
         service.saveTodo("TaskA", "DescA", Status.TODO, LocalDateTime.now().plusDays(5));
         service.saveTodo("TaskB", "DescB", Status.TODO, LocalDateTime.now().plusDays(1));
         service.saveTodo("TaskC", "DescC", Status.TODO, LocalDateTime.now().plusDays(3));
@@ -173,7 +181,7 @@ public class TodoServiceTest {
     @DisplayName("Test ordering by status functionality")
     public void givenMultipleTodos_whenSortByStatus_thenSorted() {
         // given
-        TodoServiceUtils.dropTodos(service);
+        dropTodos(service);
         service.saveTodo("TaskA", "DescA", Status.IN_PROGRESS, LocalDateTime.now().plusDays(5));
         service.saveTodo("TaskB", "DescB", Status.TODO, LocalDateTime.now().plusDays(1));
         service.saveTodo("TaskC", "DescC", Status.DONE, LocalDateTime.now().plusDays(3));
@@ -193,5 +201,17 @@ public class TodoServiceTest {
     public void givenInvalidField_whenSortBy_thenThrowException() {
         // when-then - сортировка по не поддерживаемому полю (например, TITLE) должна выбрасывать исключение
         assertThrows(ActionNotFoundException.class, () -> service.sortBy(TodoFields.TITLE));
+    }
+
+    private int findIdByTitle(String title, TodoService service) {
+        return service.findAllTodos().entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().getTitle().equals(title))
+                .findFirst().orElseThrow(() -> new TodoNotFoundException("todo not found exception"))
+                .getValue().getId();
+    }
+
+    private static void dropTodos(TodoService service) {
+        service.findAllTodos().keySet().forEach(service::removeTodo);
     }
 }

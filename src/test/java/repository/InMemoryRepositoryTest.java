@@ -7,9 +7,9 @@ import application.repository.InMemoryTodoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import utils.TodoRepositoryUtils;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -19,7 +19,14 @@ public class InMemoryRepositoryTest {
 
     @BeforeEach
     public void setUp() {
-        repository = TodoRepositoryUtils.createTodoRepository();
+        repository = new InMemoryTodoRepository(new ConcurrentHashMap<>());
+        repository.saveTodo("test1", "some description", Status.TODO, LocalDateTime.now().plusMonths(2));
+        repository.saveTodo("test2", "", Status.IN_PROGRESS, LocalDateTime.now().plusDays(2));
+        repository.saveTodo("test3", "some description larger", Status.DONE, LocalDateTime.now().minusMonths(1));
+        repository.saveTodo("test4", "hello world", Status.IN_PROGRESS, LocalDateTime.now().plusHours(3));
+        repository.saveTodo("go to work", "faster!!!", Status.IN_PROGRESS, LocalDateTime.now().plusMinutes(2));
+        repository.saveTodo("take offer", "dude just do it", Status.TODO, LocalDateTime.now().plusMonths(2));
+        repository.saveTodo("go to shop", "milk, butter, etc", Status.DONE, LocalDateTime.now().minusHours(45));
     }
 
 
@@ -45,7 +52,7 @@ public class InMemoryRepositoryTest {
 
         //when
         repository.saveTodo(title, description, status, deadline);
-        Integer id = TodoRepositoryUtils.findIdByTitle(title, repository);
+        Integer id = findIdByTitle(title, repository);
         //then
         Todo persisted = repository.findTodoById(id).orElse(null);
 
@@ -64,7 +71,7 @@ public class InMemoryRepositoryTest {
         repository.saveTodo(title, "Desc", Status.IN_PROGRESS, LocalDateTime.now().plusDays(1));
 
         //when
-        Integer id = TodoRepositoryUtils.findIdByTitle(title, repository);
+        Integer id = findIdByTitle(title, repository);
         repository.removeTodo(id);
 
         // then
@@ -95,7 +102,7 @@ public class InMemoryRepositoryTest {
         String title = "Task";
         repository.saveTodo(title, "Desc", Status.TODO, LocalDateTime.now().plusDays(1));
         String newDescription = "Updated Description";
-        Integer id = TodoRepositoryUtils.findIdByTitle(title, repository);
+        Integer id = findIdByTitle(title, repository);
 
         //when
         repository.updateDescription(id, newDescription);
@@ -112,7 +119,7 @@ public class InMemoryRepositoryTest {
         //given
         String title = "Task";
         repository.saveTodo(title, "Desc", Status.TODO, LocalDateTime.now().plusDays(1));
-        Integer id = TodoRepositoryUtils.findIdByTitle(title, repository);
+        Integer id = findIdByTitle(title, repository);
         String newTitle = "Updated title";
 
         //when
@@ -130,7 +137,7 @@ public class InMemoryRepositoryTest {
         //given
         String title = "Task";
         repository.saveTodo(title, "Desc", Status.TODO, LocalDateTime.now().plusDays(1));
-        Integer id = TodoRepositoryUtils.findIdByTitle(title, repository);
+        Integer id = findIdByTitle(title, repository);
         LocalDateTime newDeadline = LocalDateTime.now().plusDays(2);
 
         //when
@@ -140,5 +147,13 @@ public class InMemoryRepositoryTest {
         //then
         assertNotNull(updated);
         assertEquals(newDeadline, updated.getDeadline());
+    }
+
+    private int findIdByTitle(String title, InMemoryTodoRepository repository) {
+        return repository.findAllTodos().entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().getTitle().equals(title))
+                .findFirst().orElseThrow(() -> new TodoNotFoundException("todo not found exception"))
+                .getValue().getId();
     }
 }
