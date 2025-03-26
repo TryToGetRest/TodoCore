@@ -1,7 +1,6 @@
 package application;
 
 import application.controller.ConsoleTodoController;
-import application.entity.Todo;
 import application.repository.InMemoryTodoRepository;
 import application.service.TodoService;
 
@@ -19,7 +18,7 @@ public class Starter {
     public static ConsoleTodoController init() {
         return new ConsoleTodoController(
                 new Scanner(System.in),
-                new TodoService(new InMemoryTodoRepository(new HashMap<Integer, Todo>()))
+                new TodoService(new InMemoryTodoRepository(new HashMap<>()))
         );
     }
 }
