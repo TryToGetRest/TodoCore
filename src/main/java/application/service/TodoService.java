@@ -2,29 +2,78 @@ package application.service;
 
 import application.entity.Todo;
 import application.enums.Status;
+import application.enums.TodoFields;
+import application.exceptions.ActionNotFoundException;
+import application.exceptions.TodoNotFoundException;
+import application.repository.InMemoryTodoRepository;
+import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public interface TodoService {
+@Data
+public class TodoService {
 
-    void updateStatus(String title, Status status);
+    private final InMemoryTodoRepository inMemoryTodoRepository;
 
-    void updateDescription(String title, String description);
+    public void updateStatus(Integer id, Status status) {
+        inMemoryTodoRepository.updateStatus(id, status);
+    }
 
-    void updateDeadline(String title, LocalDateTime deadLine);
+    public void updateDescription(Integer id, String description) {
+        inMemoryTodoRepository.updateDescription(id, description);
+    }
 
-    void saveTodo(Todo todo);
+    public void updateTitle(Integer id, String newTitle) {
+        inMemoryTodoRepository.updateTitle(id, newTitle);
+    }
 
-    void removeTodo(Todo todo);
+    public void updateDeadline(Integer id, LocalDateTime deadLine) {
+        inMemoryTodoRepository.updateDeadline(id, deadLine);
+    }
 
-    List<Todo> findAllTodos();
+    public void saveTodo(String title, String description, Status status, LocalDateTime deadline) {
+        inMemoryTodoRepository.saveTodo(title, description, status, deadline);
+    }
 
-    Todo findTodoByTitle(String title);
+    public void removeTodo(Integer id) {
+        inMemoryTodoRepository.removeTodo(id);
+    }
 
-    List<Todo> findByStatus(Status status);
+    public Map<Integer, Todo> findAllTodos() {
+        return inMemoryTodoRepository.findAllTodos();
+    }
 
-    List<Todo> sortByDeadline();
+    public Todo findTodoById(Integer id) {
+        return inMemoryTodoRepository.findTodoById(id)
+                .orElseThrow(() -> new TodoNotFoundException(String.format("Задача с номером %n не существует", id)));
+    }
 
-    List<Todo> sortByStatus();
+    public Map<Integer, Todo> findByStatus(Status status) {
+        return inMemoryTodoRepository.findAllTodos().entrySet().stream()
+                .filter(o -> o.getValue().getStatus() == status)
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public List<Todo> sortBy(TodoFields field) {
+        switch (field) {
+            case STATUS -> {
+                return inMemoryTodoRepository.findAllTodos().entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .sorted(Comparator.comparing(Todo::getStatus))
+                        .toList();
+            }
+            case DEADLINE -> {
+                return inMemoryTodoRepository.findAllTodos().entrySet().stream()
+                        .map(Map.Entry::getValue)
+                        .sorted(Comparator.comparing(Todo::getDeadline))
+                        .toList();
+            }
+            default ->
+                    throw new ActionNotFoundException(String.format("Действие для поля %s не найдено", field.name()));
+        }
+    }
 }
